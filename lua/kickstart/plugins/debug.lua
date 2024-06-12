@@ -45,6 +45,50 @@ return {
       },
     }
 
+    -- to dodałem
+    dap.adapters.coreclr = {
+      type = 'executable',
+      command = 'C:/Users/dmoze/AppData/Local/nvim-data/mason/packages/netcoredbg/netcoredbg/netcoredbg.exe',
+      args = { '--interpreter=vscode' },
+    }
+
+    dap.configurations.cs = {
+      {
+        type = 'coreclr',
+        name = 'launch - netcoredbg',
+        request = 'launch',
+        env = 'ASPNETCORE_ENVIRONMENT=Development',
+        args = {
+          '/p:EnvironmentName=Development', -- this is a msbuild jk
+          --  this is set via environment variable ASPNETCORE_ENVIRONMENT=Development
+          '--urls=http://localhost:5002',
+          '--environment=Development',
+        },
+        program = function()
+          local dir = vim.loop.cwd() .. '/' .. vim.fn.glob 'bin/Debug/net*/'
+          local name = dir .. vim.fn.glob('*.csproj'):gsub('%.csproj$', '.dll')
+          -- if not exists(name) then os.execute 'dotnet build -r linux-x64' end
+          -- return name
+          return vim.fn.input {
+            prompt = 'Path to dll',
+            -- default = vim.fn.getcwd() .. '/bin/Debug/net8.0/',
+            default = name,
+          }
+        end,
+      },
+    }
+
+    -- dap.configurations.cs = {
+    --   {
+    --     type = 'coreclr',
+    --     name = 'launch - netcoredbg',
+    --     request = 'launch',
+    --     program = function()
+    --       return vim.fn.input('Path to dll', vim.fn.getcwd() .. '/bin/Debug/', 'file')
+    --     end,
+    --   },
+    -- }
+
     -- Basic debugging keymaps, feel free to change to your liking!
     vim.keymap.set('n', '<F5>', dap.continue, { desc = 'Debug: Start/Continue' })
     vim.keymap.set('n', '<F1>', dap.step_into, { desc = 'Debug: Step Into' })
